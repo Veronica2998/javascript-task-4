@@ -13,94 +13,90 @@ const isStar = false;
 function getEmitter() {
     var events = {};
 
-    function handle(contexts) {
-        contexts.forEach(element => {
-            if (element.times > 0 && element.count % element.frequency === 0) {
-                element.handler.call(element.context);
-                element.times--;
-            }
-            element.count++;
-        });
-    }
-
     return {
 
-    /**
-     * Подписаться на событие
-     * @param {String} event
-     * @param {Object} context
-     * @param {Function} handler
-     */
-    on: function (event, context, handler) {
-        console.info(event, context, handler);
-        const newStudent = { name: context, func: handler };
-        if (!events[event]) {
-            events[event] = [newStudent];
-        } else {
-            events[event].push(newStudent);
-        }
-
-        return this;
-    },
-
-
-    /**
-     * Отписаться от события
-     * @param {String} event
-     * @param {Object} context
-     */
-    off: function (event, context) {
-        console.info(event, context);
-        for (let key in events) {
-            if (key === event || key.startsWith(event + '.')) {
-                events[key] = events[key].filter(element => element.context !== context);
+        /**
+         * Подписаться на событие
+         * @param {String} event
+         * @param {Object} context
+         * @param {Function} handler
+         * @returns {object}
+         */
+        on: function (event, context, handler) {
+            console.info(event, context, handler);
+            const student = { name: context, function: handler };
+            if (!events[event]) {
+                events[event] = [student];
+            } else {
+                events[event].push(student);
             }
-        }
 
-        return this;
-    },
+            return this;
+        },
 
-    /**
-     * Уведомить о событии
-     * @param {String} event
-     */
-    emit: function (event) {
-        console.info(event);
-        while (event !== '') {
-            const contexts = events[event];
-            if (contexts) {
-            handle(contexts);
+
+        /**
+         * Отписаться от события
+         * @param {String} event
+         * @param {Object} context
+         * @returns {object}
+         */
+        off: function (event, context) {
+            console.info(event, context);
+            let eventUnsubs = [event];
+            for (let key of Object.keys(events)) {
+                if (key.startsWith(event + '.')) {
+                    eventUnsubs.push(key);
+                }
             }
-            event = event.substring(0, event.lastIndexOf('.'));
+            for (let incident of eventUnsubs) {
+                events[incident] = events[incident].filter(entry => entry.name !== context);
+            }
+
+            return this;
+        },
+
+        /**
+         * Уведомить о событии
+         * @param {String} event
+         * @returns {object}
+         */
+        emit: function (event) {
+            console.info(event);
+            while (event !== '') {
+                if (events[event]) {
+                    events[event].forEach(student => student.function.call(student.name));
+                }
+                event = event.substr(0, event.lastIndexOf('.'));
+            }
+
+            return this;
+        },
+
+        /**
+         * Подписаться на событие с ограничением по количеству полученных уведомлений
+         * @star
+         * @param {String} event
+         * @param {Object} context
+         * @param {Function} handler
+         * @param {Number} times – сколько раз получить уведомление
+         */
+        several: function (event, context, handler, times) {
+            console.info(event, context, handler, times);
+        },
+
+        /**
+         * Подписаться на событие с ограничением по частоте получения уведомлений
+         * @star
+         * @param {String} event
+         * @param {Object} context
+         * @param {Function} handler
+         * @param {Number} frequency – как часто уведомлять
+         */
+        through: function (event, context, handler, frequency) {
+            console.info(event, context, handler, frequency);
         }
-
-        return this;
-    },
-
-    /**
-     * Подписаться на событие с ограничением по количеству полученных уведомлений
-     * @star
-     * @param {String} event
-     * @param {Object} context
-     * @param {Function} handler
-     * @param {Number} times – сколько раз получить уведомление
-     */
-    several: function (event, context, handler, times) {
-        console.info(event, context, handler, times);
-    },
-
-    /**
-     * Подписаться на событие с ограничением по частоте получения уведомлений
-     * @star
-     * @param {String} event
-     * @param {Object} context
-     * @param {Function} handler
-     * @param {Number} frequency – как часто уведомлять
-     */
-    through: function (event, context, handler, frequency) {
-        console.info(event, context, handler, frequency);
-    }
-};
+    };
 }
 
 module.exports = {
