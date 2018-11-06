@@ -63,7 +63,7 @@ function getEmitter() {
          */
         emit: function (event) {
             console.info(event);
-            while (event !== '') {
+            while (event) {
                 if (events[event]) {
                     events[event].forEach(student => student.function.call(student.name));
                 }
